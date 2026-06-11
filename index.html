@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Claude a Fondo — Domina a Claude</title>
+<meta name="description" content="Academia para entender y dominar a Claude: características, funciones, filosofía, prompting, optimización de tokens y uso ético. Con consejos en cada tema.">
+<meta name="theme-color" content="#1a1714">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CLAUDE A FONDO — tokens (identidad cálida estilo Anthropic)
+   :root = claro (crema) · body.dark = noche (espresso, por defecto)
+   ============================================================ */
+:root{
+  --bg:#f3ede1; --bg2:#fbf8f1; --card:#ffffff;
+  --ink:#2b2419; --muted:#7a6f5e; --line:#e6dcc9;
+  --clay:#bd5d3a; --clay2:#cc785c; --sand:#b8956a;
+  --good:#4f7a4a; --warn:#b8862f; --bad:#b3452f;
+  --grad:linear-gradient(135deg,#cc785c,#bd5d3a);
+  --shadow:0 12px 32px rgba(80,55,30,.12);
+  --shadow2:0 4px 14px rgba(80,55,30,.08);
+}
+body.dark{
+  --bg:#1a1714; --bg2:#211c18; --card:#272019;
+  --ink:#ede4d3; --muted:#a99a85; --line:#3a3128;
+  --clay:#d9885f; --clay2:#cc785c; --sand:#c9a87f;
+  --good:#7fb074; --warn:#e0ac4e; --bad:#e0795f;
+  --shadow:0 12px 32px rgba(0,0,0,.45);
+  --shadow2:0 4px 14px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  min-height:100vh;transition:background .3s,color .3s;
+  background-image:radial-gradient(1000px 460px at 84% -10%, rgba(204,120,92,.14), transparent 60%),
+                   radial-gradient(820px 400px at -8% 26%, rgba(184,149,106,.12), transparent 60%);
+  background-attachment:fixed;
+}
+h1,h2,h3,h4{font-family:'Fraunces',Georgia,serif;font-weight:600}
+code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button:active{transform:scale(.98)}
+.wrap{max-width:780px;margin:0 auto;padding:0 14px 60px}
+
+/* encabezado */
+.top{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.logo{width:42px;height:42px;border-radius:12px;background:var(--grad);display:grid;place-items:center;font-family:'Fraunces';font-weight:700;font-size:24px;color:#fff;box-shadow:var(--shadow2);flex:none;animation:pop .5s ease}
+.brand h1{font-size:1.12rem;line-height:1.05;color:var(--clay)}
+.brand p{font-size:.66rem;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.actions{display:flex;gap:8px}
+.icbtn{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:18px;display:grid;place-items:center;box-shadow:var(--shadow2);transition:transform .15s}
+.icbtn:hover{transform:translateY(-2px)}
+.installbtn{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:12px;background:var(--grad);color:#fff;font-weight:700;font-size:.82rem;box-shadow:var(--shadow2);white-space:nowrap;transition:transform .15s,filter .15s}
+.installbtn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+
+/* banner consejo */
+.motiv{display:block;width:100%;text-align:left;margin:14px 0 4px;padding:13px 16px;border-radius:14px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--clay);font-size:.88rem;color:var(--muted);box-shadow:var(--shadow2);transition:opacity .3s;line-height:1.5}
+.motiv.out{opacity:0}
+.motiv b{color:var(--clay);font-weight:700}
+
+/* nav */
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:12px 0 18px}
+.tabs button{padding:10px 3px;border-radius:13px;background:var(--card);border:1px solid var(--line);font-size:.7rem;font-weight:600;color:var(--muted);box-shadow:var(--shadow2);transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.1}
+.tabs button .ti{font-size:16px}
+.tabs button.on{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(189,93,58,.32)}
+
+.view{animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:.8rem;font-weight:600;box-shadow:var(--shadow2)}
+.intro{font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:16px;padding:0 2px}
+
+/* grilla de módulos */
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:560px){.grid{grid-template-columns:1fr 1fr}}
+.modcard{position:relative;text-align:left;padding:18px 16px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow2);transition:transform .18s,box-shadow .18s;overflow:hidden}
+.modcard:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.modcard::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--cc,var(--clay))}
+.modcard .mhead{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.modcard .em{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:24px;flex:none;background:color-mix(in srgb,var(--cc,var(--clay)) 16%,transparent)}
+.modcard h3{font-size:1.05rem;line-height:1.2}
+.modcard .n{font-size:.72rem;color:var(--muted)}
+.modcard .mdesc{font-size:.8rem;color:var(--muted);line-height:1.45;margin-bottom:11px}
+.mini{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.mini>i{display:block;height:100%;border-radius:99px;background:var(--cc,var(--clay));transition:width .4s}
+.modcard .done{position:absolute;top:12px;right:12px;font-size:16px;animation:pop .4s ease}
+.reshub{display:flex;align-items:center;gap:13px;width:100%;text-align:left;margin-top:12px;padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow2);transition:transform .18s,box-shadow .18s}
+.reshub:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.reshub .em{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:22px;flex:none;background:var(--grad);color:#fff}
+.reshub h3{font-size:1rem}
+.reshub p{font-size:.8rem;color:var(--muted);line-height:1.4;margin-top:2px}
+.reshub .go{margin-left:auto;font-size:1.3rem;color:var(--muted)}
+
+/* detalle módulo */
+.back{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:11px;margin-bottom:12px;background:var(--card);border:1px solid var(--line);font-size:.82rem;font-weight:600;box-shadow:var(--shadow2)}
+.cathead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.cathead .em{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;font-size:28px;flex:none;background:color-mix(in srgb,var(--cc,var(--clay)) 18%,transparent)}
+.cathead h2{font-size:1.3rem}
+.cathead p{font-size:.8rem;color:var(--muted);line-height:1.4}
+.subtabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.subtabs button{padding:10px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-weight:600;font-size:.85rem;color:var(--muted)}
+.subtabs button.on{background:var(--cc,var(--clay));color:#fff;border-color:transparent}
+
+/* tarjeta de concepto */
+.concept{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow2)}
+.concept header{display:flex;align-items:flex-start;gap:11px;margin-bottom:13px}
+.concept .num{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;font-family:'Fraunces';font-weight:700;font-size:.82rem;color:#fff;background:var(--cc,var(--clay))}
+.concept h3{font-size:1.1rem;line-height:1.25;flex:1}
+.concept .ok{font-size:20px;flex:none}
+.block{padding:11px 13px;border-radius:12px;margin-bottom:8px;background:color-mix(in srgb,var(--bg) 55%,transparent);border:1px solid var(--line)}
+.block b{display:flex;align-items:center;gap:6px;font-size:.69rem;letter-spacing:.04em;text-transform:uppercase;color:var(--cc,var(--clay));margin-bottom:5px;font-weight:700}
+.block p{font-size:.9rem;line-height:1.6}
+.block.tip{background:color-mix(in srgb,var(--clay) 10%,transparent);border-color:color-mix(in srgb,var(--clay) 30%,transparent)}
+.prompt{font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.55;background:color-mix(in srgb,var(--ink) 6%,transparent);border:1px solid var(--line);border-radius:10px;padding:11px 12px;white-space:pre-wrap;position:relative}
+body.dark .prompt{background:rgba(0,0,0,.25)}
+.copybtn{position:absolute;top:7px;right:7px;font-size:.66rem;font-weight:700;padding:4px 9px;border-radius:8px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
+.copybtn:hover{color:var(--clay);border-color:var(--clay)}
+.learnbtn{width:100%;margin-top:6px;padding:12px;border-radius:13px;font-weight:700;font-size:.9rem;border:2px solid var(--cc,var(--clay));color:var(--cc,var(--clay));background:transparent;transition:all .2s}
+.learnbtn.on{background:var(--good);border-color:var(--good);color:#fff}
+
+/* flashcards */
+.fcwrap{perspective:1200px;margin-bottom:14px}
+.fc{position:relative;height:330px;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,.1,.2,1)}
+.fcwrap.flip .fc{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.face.bk{transform:rotateY(180deg);justify-content:flex-start;text-align:left;align-items:stretch;overflow:auto}
+.face .bigem{font-size:48px;animation:floatY 3.2s ease-in-out infinite}
+.face h3{font-size:1.35rem;line-height:1.3}
+.face .hint{font-size:.75rem;color:var(--muted)}
+.fcnav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.fcnav button{padding:11px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-weight:600;font-size:.85rem;box-shadow:var(--shadow2)}
+.fcpos{text-align:center;font-size:.78rem;color:var(--muted);margin-bottom:8px}
+
+/* comparador de modelos */
+.mcompare{display:grid;gap:12px}
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow2);position:relative;overflow:hidden}
+.mcard::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--cc,var(--clay))}
+.mcard .mh{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.mcard h3{font-size:1.08rem}
+.mcard .mid{font-family:'JetBrains Mono';font-size:.72rem;color:var(--muted);background:color-mix(in srgb,var(--cc,var(--clay)) 12%,transparent);padding:3px 8px;border-radius:7px}
+.mcard .mtag{font-size:.66rem;font-weight:700;color:#fff;background:var(--cc,var(--clay));padding:3px 9px;border-radius:99px}
+.mcard .mdesc{font-size:.86rem;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.mspecs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.mspec{text-align:center;padding:8px 4px;border-radius:10px;background:color-mix(in srgb,var(--bg) 55%,transparent);border:1px solid var(--line)}
+.mspec .sv{font-family:'Fraunces';font-weight:700;font-size:.95rem}
+.mspec .sl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+
+/* glosario */
+.search{width:100%;padding:13px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:inherit;font-size:.95rem;margin-bottom:14px;box-shadow:var(--shadow2);outline:none}
+.search:focus{border-color:var(--clay)}
+.gitem{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:15px;padding:13px 15px;margin-bottom:9px;box-shadow:var(--shadow2);transition:transform .15s}
+.gitem:hover{transform:translateX(3px)}
+.gitem .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gitem h4{font-size:.96rem}
+.gtag{font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:99px;color:#fff;background:var(--cc,var(--clay))}
+.gitem .def{font-size:.83rem;color:var(--muted);margin-top:5px;line-height:1.5}
+.gitem .more{display:none;margin-top:8px}
+.gitem.open .more{display:block;animation:fadeUp .25s ease}
+.empty{text-align:center;color:var(--muted);font-size:.85rem;padding:30px 10px}
+
+/* quiz */
+.qhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.qhead .score{font-size:.82rem;font-weight:600;color:var(--muted)}
+.reset{padding:8px 13px;border-radius:11px;font-size:.76rem;font-weight:600;background:var(--card);border:1px solid var(--line)}
+.qbar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-bottom:16px}
+.qbar>i{display:block;height:100%;background:var(--grad);border-radius:99px;transition:width .4s}
+.qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow2);margin-bottom:12px}
+.qcard .qtag{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.qcard .qtext{font-size:1rem;line-height:1.6;font-weight:500}
+.opt{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:13px 14px;border-radius:14px;background:var(--card);border:2px solid var(--line);margin-bottom:9px;font-size:.9rem;font-weight:600;box-shadow:var(--shadow2);transition:all .2s}
+.opt:hover{border-color:var(--clay)}
+.opt .lt{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex:none;font-family:'Fraunces';font-weight:700;font-size:.78rem;background:var(--line)}
+.opt.good{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--card))}
+.opt.good .lt{background:var(--good);color:#fff}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--card));animation:shake .35s}
+.opt.bad .lt{background:var(--bad);color:#fff}
+.opt:disabled{cursor:default}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.nextbtn{width:100%;padding:14px;border-radius:14px;background:var(--grad);color:#fff;font-weight:700;font-size:.95rem;box-shadow:0 8px 22px rgba(189,93,58,.32);margin-top:4px;animation:fadeUp .3s ease}
+.qfeed{font-size:.86rem;line-height:1.55;padding:12px 14px;border-radius:12px;margin-bottom:10px;animation:fadeUp .3s ease}
+.qfeed.ok{background:color-mix(in srgb,var(--good) 13%,transparent);color:var(--good);font-weight:600}
+.qfeed.no{background:color-mix(in srgb,var(--bad) 11%,transparent)}
+.qfeed.no b{color:var(--ink)}
+
+/* progreso */
+.ringbox{display:flex;align-items:center;gap:20px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow2);margin-bottom:14px}
+.ring{width:148px;height:148px;border-radius:50%;display:grid;place-items:center;flex:none;transition:background .5s}
+.ring>div{width:110px;height:110px;border-radius:50%;background:var(--card);display:grid;place-items:center;text-align:center}
+.ring b{font-family:'Fraunces';font-size:1.7rem;display:block}
+.ring span{font-size:.64rem;color:var(--muted);font-weight:600}
+.ringinfo{flex:1}
+.ringinfo h3{font-size:1.05rem;margin-bottom:6px}
+.ringinfo p{font-size:.8rem;color:var(--muted);line-height:1.55}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow2);margin-bottom:14px}
+.pcard h3{font-size:.98rem;margin-bottom:12px}
+.brow{margin-bottom:11px}
+.brow .lab{display:flex;justify-content:space-between;font-size:.78rem;font-weight:600;margin-bottom:5px}
+.brow .lab span:last-child{color:var(--muted)}
+.bar{height:9px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;transition:width .5s}
+.medals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(min-width:560px){.medals{grid-template-columns:repeat(4,1fr)}}
+.medal{text-align:center;padding:13px 6px;border-radius:14px;border:1px solid var(--line);background:color-mix(in srgb,var(--bg) 55%,transparent)}
+.medal .be{font-size:25px;display:block;margin-bottom:5px}
+.medal b{font-size:.67rem;display:block;line-height:1.2}
+.medal small{font-size:.6rem;color:var(--muted);display:block;margin-top:3px;line-height:1.25}
+.medal.lock{opacity:.4;filter:grayscale(1)}
+.medal.unlock{border-color:var(--clay);box-shadow:0 0 14px rgba(189,93,58,.22)}
+
+/* celebración */
+#cele{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(20,14,8,.8);backdrop-filter:blur(6px);padding:20px}
+#cele[hidden]{display:none}
+.celebox{position:relative;z-index:2;max-width:420px;width:100%;text-align:center;padding:34px 24px;border-radius:24px;background:var(--card);border:1px solid var(--line);box-shadow:0 24px 70px rgba(0,0,0,.5);animation:pop .5s ease}
+.celebox .ce{font-size:56px;display:block;margin-bottom:8px;animation:floatY 2.4s ease-in-out infinite}
+.celebox h2{font-size:1.35rem;margin-bottom:8px;color:var(--clay)}
+.celebox p{font-size:.92rem;line-height:1.55;color:var(--muted);margin-bottom:18px}
+.celebox button{width:100%;padding:14px;border-radius:13px;background:var(--grad);color:#fff;font-weight:700;font-size:.95rem}
+.confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.confetti i{position:absolute;top:-4vh;width:9px;height:14px;border-radius:2px;opacity:.95;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(112vh) rotate(720deg);opacity:.6}}
+
+/* splash */
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:28px;overflow:hidden;background:radial-gradient(900px 600px at 72% 12%, rgba(204,120,92,.3), transparent 60%),radial-gradient(700px 500px at 12% 82%, rgba(184,149,106,.26), transparent 60%), #18130f;color:#ede4d3}
+#splash[hidden]{display:none}
+#splash .slogo{width:92px;height:92px;border-radius:24px;background:var(--grad);display:grid;place-items:center;font-family:'Fraunces';font-weight:700;font-size:50px;color:#fff;box-shadow:0 16px 50px rgba(204,120,92,.45);animation:pop .6s ease}
+#splash h1{font-family:'Fraunces';font-size:2.1rem;color:#f0c9b4}
+#splash .sub{max-width:440px;font-size:.95rem;line-height:1.6;color:#b6a48d}
+#splash .feats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:470px}
+#splash .feats span{font-size:.73rem;font-weight:600;padding:7px 12px;border-radius:99px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
+#splash .go{margin-top:8px;padding:15px 32px;border-radius:15px;background:var(--grad);color:#fff;font-weight:700;font-size:1rem;font-family:'Fraunces';box-shadow:0 12px 36px rgba(189,93,58,.4)}
+.floaty{position:absolute;font-family:'Fraunces';font-size:30px;opacity:.16;animation:floatY 4s ease-in-out infinite;pointer-events:none;color:#f0c9b4}
+
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);z-index:95;max-width:90vw;padding:12px 18px;border-radius:13px;background:var(--ink);color:var(--bg2);font-size:.84rem;font-weight:600;box-shadow:var(--shadow);opacity:0;transition:all .35s;pointer-events:none;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.foot{text-align:center;font-size:.72rem;color:var(--muted);margin-top:34px;line-height:1.7}
+.foot b{color:var(--clay)}
+.upd{font-size:.66rem;color:var(--muted);text-align:center;margin-top:10px;opacity:.8}
+
+@media(max-width:430px){
+  .brand p{display:none}
+  .brand h1{font-size:1.02rem}
+  .actions{gap:6px}
+  .icbtn{width:38px;height:38px;font-size:16px}
+  .installbtn{height:38px;font-size:.76rem;padding:0 11px;gap:5px}
+  .mspecs{grid-template-columns:1fr 1fr 1fr}
+}
+</style>
+</head>
+<body class="dark">
+
+<div id="splash" hidden>
+  <span class="floaty" style="top:13%;left:12%">C</span>
+  <span class="floaty" style="top:20%;right:13%;animation-delay:.8s">✶</span>
+  <span class="floaty" style="bottom:22%;left:16%;animation-delay:1.5s">∿</span>
+  <span class="floaty" style="bottom:15%;right:14%;animation-delay:.4s">◆</span>
+  <div class="slogo">C</div>
+  <h1>Claude a Fondo</h1>
+  <p class="sub">Entiende y <b>domina a Claude</b>: características, filosofía, prompting, optimización de tokens y uso ético. Con un <b>consejo de experto</b> en cada tema. ☕</p>
+  <div class="feats">
+    <span>🧠 Características</span><span>💬 Prompting</span><span>🪙 Tokens y costos</span><span>⚖️ Ética</span><span>⚖️ Comparador</span><span>📴 Offline</span>
+  </div>
+  <button class="go" data-a="enter">✶ Entrar</button>
+</div>
+
+<header class="top">
+  <div class="brand">
+    <div class="logo">C</div>
+    <div><h1>Claude a Fondo</h1><p>Domina a Claude</p></div>
+  </div>
+  <div class="actions">
+    <button class="icbtn" id="btnSound" data-a="sound" title="Sonido">🔊</button>
+    <button class="icbtn" id="btnDark" data-a="dark" title="Tema">☀️</button>
+    <button class="installbtn" id="btnInstall" data-a="install" title="Descargar / instalar la app" hidden>⬇️ Descargar</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <button id="motiv" class="motiv" data-a="motive"></button>
+
+  <nav class="tabs" id="nav">
+    <button data-a="nav" data-v="home"><span class="ti">🏠</span>Temas</button>
+    <button data-a="nav" data-v="models"><span class="ti">⚖️</span>Modelos</button>
+    <button data-a="nav" data-v="gloss"><span class="ti">📖</span>Glosario</button>
+    <button data-a="nav" data-v="quiz"><span class="ti">🧠</span>Desafío</button>
+    <button data-a="nav" data-v="progress"><span class="ti">📊</span>Progreso</button>
+  </nav>
+
+  <main id="app"></main>
+
+  <footer class="foot">Hecho con <b>Claude</b> · academia para dominar a Claude · funciona sin internet<br>Los datos técnicos se verificaron contra la documentación oficial de Anthropic.</footer>
+  <div class="upd" id="upd"></div>
+</div>
+
+<div id="cele" hidden>
+  <div class="confetti" id="confetti"></div>
+  <div class="celebox">
+    <span class="ce" id="celeEmoji">✶</span>
+    <h2 id="celeTitle"></h2>
+    <p id="celeText"></p>
+    <button data-a="cele-ok">Seguir →</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   DATA — { termino, queEs, comoUsarlo, ejemplo(prompt), consejo }
+   Última verificación de datos técnicos: jun-2026 (docs Anthropic).
+   ============================================================ */
+const DATA = { categorias: [
+/* ===== MÓDULO 1 · CONOCE A CLAUDE ===== */
+{ id:"conoce", titulo:"Conoce a Claude", icono:"🧠", colorAcento:"#cc785c",
+  desc:"Qué es Claude, quién lo hace y cuál de sus modelos te conviene.",
+  conceptos:[
+  { termino:"¿Qué es Claude?",
+    queEs:"Claude es la familia de modelos de IA creada por Anthropic, una empresa fundada con la seguridad de la IA como prioridad. Está diseñado para ser útil, honesto e inofensivo, y destaca en escritura, análisis, programación y conversaciones largas con mucho contexto.",
+    comoUsarlo:"Lo usas a través de las apps de Claude (web, escritorio, móvil), de Claude Code en la terminal, o conectándote a su API desde tu propio software. La misma «familia» de modelos está detrás de todas esas vías.",
+    ejemplo:"Pégale un contrato de 80 páginas y pídele: «Resume los puntos riesgosos en lenguaje simple y dime qué cláusula me conviene negociar».",
+    consejo:"Trátalo como un colega muy capaz, no como un oráculo: dale contexto, revisa lo importante y aprovecha su fuerte en textos largos. (Dato: esta app fue construida con Claude.)" },
+  { termino:"La familia de modelos",
+    queEs:"Anthropic ofrece varios modelos que comparten «carácter» pero difieren en potencia, velocidad y costo. Los actuales son Claude Fable 5 (el más potente), Opus 4.8 (el más capaz tipo Opus), Sonnet 4.6 (equilibrio) y Haiku 4.5 (el más rápido y económico).",
+    comoUsarlo:"En las apps eliges el modelo desde un menú; en la API lo eliges con su identificador exacto (por ejemplo, claude-opus-4-8). Modelos más potentes cuestan más por token; los livianos son más baratos y rápidos.",
+    ejemplo:"IDs reales:\nclaude-fable-5\nclaude-opus-4-8\nclaude-sonnet-4-6\nclaude-haiku-4-5",
+    consejo:"No uses siempre el más grande «por si acaso». Empieza por el que sobra para la tarea: Haiku para cosas simples y masivas, Sonnet para el día a día, Opus/Fable para lo más difícil. Mira el comparador ⚖️." },
+  { termino:"Opus, Sonnet, Haiku: ¿cuál elijo?",
+    queEs:"Es la decisión más práctica del día a día. Cada modelo apunta a un punto distinto entre inteligencia, velocidad y costo: no hay uno «mejor», hay uno mejor para tu tarea.",
+    comoUsarlo:"Guía rápida: Haiku 4.5 para tareas simples y de alto volumen (clasificar, extraer, respuestas cortas); Sonnet 4.6 para la mayoría del trabajo (buen equilibrio); Opus 4.8 / Fable 5 para lo más exigente (razonamiento profundo, agentes autónomos, código complejo).",
+    ejemplo:"«Clasifica estos 10.000 comentarios como positivo/negativo» → Haiku.\n«Redacta y analiza este informe» → Sonnet.\n«Refactoriza este proyecto entero» → Opus o Fable.",
+    consejo:"Prueba un escalón por debajo del que crees necesitar: muchas veces Sonnet resuelve lo que pensabas que requería Opus, a la mitad del costo. Sube solo si la calidad no alcanza." },
+  { termino:"Ventana de contexto",
+    queEs:"Es cuánta información puede tener Claude «a la vista» a la vez (lo que le envías más lo que responde), medida en tokens. Fable 5, Opus 4.8 y Sonnet 4.6 manejan hasta 1 millón de tokens; Haiku 4.5, hasta 200.000.",
+    comoUsarlo:"Una ventana grande te deja pegar libros enteros, bases de código o muchas conversaciones sin que «olvide» el principio. Un millón de tokens equivale aproximadamente a varios libros de texto juntos.",
+    ejemplo:"Subir un repositorio completo y preguntar: «¿Dónde se valida el pago y qué pasaría si quito esta función?».",
+    consejo:"Tener 1M de contexto no significa que debas llenarlo: más contexto = más costo y, a veces, menos foco. Dale lo relevante, no todo lo que tengas. En Opus 4.8 el millón viene sin recargo por contexto largo." },
+  { termino:"Tokens de entrada vs salida",
+    queEs:"Claude cobra (en la API) por token, y el precio de lo que tú envías (input) es más barato que el de lo que genera (output). Cada modelo tiene su tarifa: el output suele costar unas 5 veces más que el input.",
+    comoUsarlo:"Precios por millón de tokens (input / output): Fable 5 $10 / $50 · Opus 4.8 $5 / $25 · Sonnet 4.6 $3 / $15 · Haiku 4.5 $1 / $5. Una respuesta larga pesa mucho más en la factura que un prompt largo.",
+    ejemplo:"Estimar el costo de un chatbot: ~1.500 tokens de input + ~500 de output por conversación, × tu volumen mensual, × la tarifa del modelo elegido.",
+    consejo:"Para ahorrar, pide respuestas concisas (menos output) y elige bien el modelo. El input barato permite darle buen contexto sin que duela; el output caro premia ir al grano." },
+  { termino:"Las fortalezas de Claude",
+    queEs:"Cada modelo tiene su perfil, pero la familia destaca en escritura clara, análisis de documentos largos, programación y razonamiento de varios pasos. Opus 4.8 es especialmente bueno en tareas autónomas y de largo aliento; Sonnet, en velocidad con calidad.",
+    comoUsarlo:"Apóyate en lo que hace bien: borradores y reescritura, resumen y comparación de documentos, depurar y explicar código, planear tareas complejas, y trabajar como «agente» con herramientas.",
+    ejemplo:"«Lee estos 3 informes, compáralos en una tabla y dime en qué se contradicen, citando la página de cada uno».",
+    consejo:"Saca partido del contexto largo: en vez de hacer 5 preguntas sueltas, pega todo el material de una vez y pide el análisis completo. Aprovechas su fuerte y gastas menos en idas y vueltas." }
+]}
+]};
+
+/* ============================================================
+   MODELOS — datos verificados (docs Anthropic, jun-2026)
+   ============================================================ */
+const MODELOS = [
+  { nombre:"Claude Fable 5", id:"claude-fable-5", cc:"#8a4d8f", tag:"El más potente",
+    desc:"El modelo más potente e inteligente, un escalón por encima de Opus. Para lo más exigente, sin reparar en costo.",
+    ctx:"1M", inp:"$10", out:"$50" },
+  { nombre:"Claude Opus 4.8", id:"claude-opus-4-8", cc:"#cc785c", tag:"El más capaz",
+    desc:"El Opus más capaz: altamente autónomo, brilla en trabajo de largo aliento, agentes, código y análisis profundo.",
+    ctx:"1M", inp:"$5", out:"$25" },
+  { nombre:"Claude Sonnet 4.6", id:"claude-sonnet-4-6", cc:"#b8862f", tag:"Equilibrio ⭐",
+    desc:"El mejor equilibrio entre velocidad e inteligencia. La opción por defecto para el día a día y producción.",
+    ctx:"1M", inp:"$3", out:"$15" },
+  { nombre:"Claude Haiku 4.5", id:"claude-haiku-4-5", cc:"#4f7a4a", tag:"Rápido y barato",
+    desc:"El más rápido y económico. Ideal para tareas simples, de alto volumen y sensibles a la latencia.",
+    ctx:"200K", inp:"$1", out:"$5" }
+];
+
+/* ============================================================
+   FRASES — consejo rotativo, celebraciones, medallas
+   ============================================================ */
+const MOTIVES = [
+  "<b>Consejo:</b> mientras más contexto relevante le das a Claude, mejor responde. Contexto barato, resultado caro.",
+  "<b>Consejo:</b> dile «actúa como…» para fijar el tono y el nivel de la respuesta. Asignar un rol es gratis y cambia todo.",
+  "<b>Consejo:</b> Claude entiende muy bien la estructura con etiquetas XML (&lt;tarea&gt;, &lt;contexto&gt;). Úsalas para prompts complejos.",
+  "<b>Consejo:</b> dile qué SÍ hacer, no solo qué evitar. Las instrucciones en positivo funcionan mejor.",
+  "<b>Consejo:</b> ¿problema difícil? Pídele que «piense paso a paso» o usa un modelo que razone (Opus/Fable).",
+  "<b>Consejo:</b> para ahorrar, pide respuestas concisas: el output es ~5× más caro que el input.",
+  "<b>Consejo:</b> no uses Opus para todo. Sonnet resuelve la mayoría del trabajo a menos costo.",
+  "<b>Consejo:</b> trata la primera respuesta como borrador. Itera: «más corto», «más formal», «con ejemplos».",
+  "<b>Consejo:</b> no le pegues secretos (claves, datos personales) si no es necesario. Verifica lo importante.",
+  "<b>Consejo:</b> el «prompt caching» puede ahorrar hasta ~90% si reutilizas el mismo contexto largo entre llamadas.",
+  "<b>Dato:</b> Anthropic nació con la seguridad como misión; por eso Claude a veces se niega: no es un error, es diseño."
+];
+const CEL = {
+  mod:[ "Módulo completado: «{cat}». Ya manejas a Claude un poco mejor. ✶",
+        "«{cat}» dominado. Menos magia, más maestría. 🎯",
+        "Cerraste «{cat}». Tu Claude rinde más que ayer." ],
+  m25:[ "25% del camino. Empiezas a hablarle a Claude como un profesional. 📈" ],
+  m50:[ "Mitad de la academia. Ya optimizas prompts y eliges modelo con criterio. 🚀" ],
+  m75:[ "75%. Te falta poco para sacarle todo el jugo a Claude. 🔭" ],
+  m100:[ "100% COMPLETADO. Dominas a Claude de punta a punta: características, filosofía, prompting, tokens y ética. Maestría desbloqueada. 👑" ]
+};
+const MEDALS = [
+  { id:"hola",  emoji:"✶", nombre:"Primer paso",        desc:"Tu primer concepto entendido",   cond:s=>s.learned>=1 },
+  { id:"medio", emoji:"📘", nombre:"Aplicado",           desc:"La mitad de los conceptos",      cond:s=>s.learned>=Math.ceil(s.total/2) },
+  { id:"conoce",emoji:"🧠", nombre:"Conoce a Claude",    desc:"Módulo «Conoce a Claude»",       cond:s=>s.modsDone.includes("conoce") },
+  { id:"ojo",   emoji:"🎯", nombre:"Buen ojo",           desc:"10 aciertos en el Desafío",      cond:s=>s.quiz>=10 },
+  { id:"sniper",emoji:"🏆", nombre:"Desafío perfecto",   desc:"Todos los aciertos del Desafío", cond:s=>s.quiz>=s.quizTotal },
+  { id:"fuego", emoji:"🔥", nombre:"En racha",           desc:"3 días seguidos",                cond:s=>s.streak>=3 },
+  { id:"rey",   emoji:"👑", nombre:"Maestría total",     desc:"100% de la academia",            cond:s=>s.learned>=s.total }
+];
+
+/* ============================================================
+   ESTADO Y PERSISTENCIA (localStorage, prefijo "caf")
+   ============================================================ */
+const MODS = DATA.categorias;
+const TOTAL = MODS.reduce((n,c)=>n+c.conceptos.length,0);
+const QUIZTOTAL = TOTAL;
+const key = (m,i)=>m.id+"-"+i;
+const loadSet = k=>new Set(JSON.parse(localStorage.getItem(k)||"[]"));
+const saveSet = (k,s)=>localStorage.setItem(k,JSON.stringify([...s]));
+let learned=loadSet("cafLearned"), quizOK=loadSet("cafQuiz"), milestones=loadSet("cafMiles"), medals=loadSet("cafMedals");
+const state={ view:"home", mod:null, tab:"aprender", fcOrder:[], fcIdx:0, fcFlip:false, gq:"", quiz:null };
+function save(){ saveSet("cafLearned",learned); saveSet("cafQuiz",quizOK); saveSet("cafMiles",milestones); saveSet("cafMedals",medals); }
+
+function hoy(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+let streak=JSON.parse(localStorage.getItem("cafStreak")||"null")||{last:"",count:0};
+(function(){ const t=hoy(); if(streak.last===t) return; const a=new Date(); a.setDate(a.getDate()-1); const aStr=a.getFullYear()+"-"+String(a.getMonth()+1).padStart(2,"0")+"-"+String(a.getDate()).padStart(2,"0"); streak={last:t,count:streak.last===aStr?streak.count+1:1}; localStorage.setItem("cafStreak",JSON.stringify(streak)); })();
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const modsDone=()=>MODS.filter(m=>m.conceptos.every((_,i)=>learned.has(key(m,i)))).map(m=>m.id);
+
+/* sonido */
+let soundOn=localStorage.getItem("cafSound")!=="0"; let actx=null;
+function tone(f,dur,delay,type,vol){ if(!soundOn)return; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime+(delay||0); o.type=type||"sine";o.frequency.value=f; g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.1,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){} }
+const tick=()=>tone(660,0.05,0,"triangle",0.05);
+const ding=()=>{tone(560,0.11,0,"sine",0.11);tone(840,0.2,0.08,"sine",0.11);};
+const buzz=()=>tone(150,0.2,0,"square",0.07);
+const fanfare=()=>[523,659,784,1047].forEach((f,i)=>tone(f,0.26,i*0.12,"triangle",0.12));
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render(){
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on", b.dataset.v===state.view || (state.view==="mod"&&b.dataset.v==="home")));
+  const app=$("#app");
+  if(state.view==="home")     app.innerHTML=vHome();
+  if(state.view==="mod")      app.innerHTML=vMod();
+  if(state.view==="models")   app.innerHTML=vModels();
+  if(state.view==="gloss")    app.innerHTML=vGloss();
+  if(state.view==="quiz")     app.innerHTML=vQuiz();
+  if(state.view==="progress") app.innerHTML=vProgress();
+}
+
+function vHome(){
+  const done=modsDone();
+  const cards=MODS.map(m=>{
+    const tot=m.conceptos.length, ok=m.conceptos.filter((_,i)=>learned.has(key(m,i))).length, pct=Math.round(ok/tot*100), full=ok===tot;
+    return `<button class="modcard" data-a="mod" data-id="${m.id}" style="--cc:${m.colorAcento}">
+      ${full?'<span class="done">✅</span>':""}
+      <div class="mhead"><span class="em">${m.icono}</span><div><h3>${esc(m.titulo)}</h3><div class="n">${ok}/${tot} conceptos</div></div></div>
+      <div class="mdesc">${esc(m.desc)}</div>
+      <div class="mini"><i style="width:${pct}%"></i></div>
+    </button>`;
+  }).join("");
+  return `<div class="view">
+    <div class="stats">
+      <span class="chip">🔥 ${streak.count} día${streak.count===1?"":"s"}</span>
+      <span class="chip">✅ ${learned.size}/${TOTAL}</span>
+      <span class="chip">🏅 ${medals.size}</span>
+      ${done.length?`<span class="chip">🎓 ${done.length} módulo${done.length===1?"":"s"}</span>`:""}
+    </div>
+    <p class="intro">Cada tema responde 4 cosas: <b>qué es</b>, <b>cómo usarlo</b>, un <b>ejemplo de prompt</b> y un <b>💡 consejo de experto</b>. Empieza por un módulo o compara los modelos ⚖️.</p>
+    <div class="grid">${cards}</div>
+    <button class="reshub" data-a="nav-models"><span class="em">⚖️</span><div><h3>Comparador de modelos</h3><p>Fable · Opus · Sonnet · Haiku — contexto, precios y cuándo usar cada uno.</p></div><span class="go">→</span></button>
+  </div>`;
+}
+
+function vMod(){
+  const m=MODS.find(x=>x.id===state.mod); if(!m){state.view="home";return vHome();}
+  const inner=state.tab==="aprender"?vLearn(m):vPractice(m);
+  return `<div class="view" style="--cc:${m.colorAcento}">
+    <button class="back" data-a="back">← Todos los temas</button>
+    <div class="cathead"><span class="em">${m.icono}</span><div><h2>${esc(m.titulo)}</h2><p>${esc(m.desc)}</p></div></div>
+    <div class="subtabs">
+      <button class="${state.tab==="aprender"?"on":""}" data-a="tab" data-t="aprender">📖 Aprender</button>
+      <button class="${state.tab==="practicar"?"on":""}" data-a="tab" data-t="practicar">🔁 Practicar</button>
+    </div>${inner}</div>`;
+}
+function promptBox(txt){ return `<div class="prompt">${esc(txt)}<button class="copybtn" data-a="copy" data-t="${esc(txt)}">⧉ copiar</button></div>`; }
+function vLearn(m){
+  return m.conceptos.map((c,i)=>{
+    const k=key(m,i), on=learned.has(k);
+    return `<article class="concept">
+      <header><span class="num">${i+1}</span><h3>${esc(c.termino)}</h3>${on?'<span class="ok">✅</span>':""}</header>
+      <div class="block"><b>🎯 ¿Qué es?</b><p>${esc(c.queEs)}</p></div>
+      <div class="block"><b>🔧 ¿Cómo usarlo?</b><p>${esc(c.comoUsarlo)}</p></div>
+      <div class="block"><b>💬 Ejemplo</b>${promptBox(c.ejemplo)}</div>
+      <div class="block tip"><b>💡 Consejo de experto</b><p>${esc(c.consejo)}</p></div>
+      <button class="learnbtn ${on?"on":""}" data-a="learn" data-k="${k}">${on?"✅ Entendido":"Marcar como aprendido"}</button>
+    </article>`;
+  }).join("");
+}
+function vPractice(m){
+  if(!state.fcOrder.length||state.fcOrder.length!==m.conceptos.length) state.fcOrder=shuffle(m.conceptos.map((_,i)=>i));
+  const idx=state.fcOrder[state.fcIdx%state.fcOrder.length], c=m.conceptos[idx], k=key(m,idx), on=learned.has(k);
+  return `<div class="fcpos">Tarjeta ${state.fcIdx+1} de ${m.conceptos.length} · toca para revelar</div>
+  <div class="fcwrap ${state.fcFlip?"flip":""}" data-a="flip"><div class="fc">
+    <div class="face"><span class="bigem">${m.icono}</span><h3>${esc(c.termino)}</h3><span class="hint">¿Lo cachas? Toca para comprobar 👆</span></div>
+    <div class="face bk"><div class="block"><b>🎯 ¿Qué es?</b><p>${esc(c.queEs)}</p></div><div class="block tip"><b>💡 Consejo</b><p>${esc(c.consejo)}</p></div></div>
+  </div></div>
+  <div class="fcnav"><button data-a="fc-prev">◀</button><button data-a="fc-shuffle">🔀</button><button data-a="fc-next">▶</button></div>
+  <button class="learnbtn ${on?"on":""}" data-a="fc-learn" data-k="${k}">${on?"✅ Lo domino":"✓ Lo domino"}</button>`;
+}
+
+function vModels(){
+  const cards=MODELOS.map(m=>`<div class="mcard" style="--cc:${m.cc}">
+    <div class="mh"><h3>${esc(m.nombre)}</h3><span class="mtag">${esc(m.tag)}</span></div>
+    <div><span class="mid">${esc(m.id)}</span></div>
+    <div class="mdesc" style="margin-top:8px">${esc(m.desc)}</div>
+    <div class="mspecs">
+      <div class="mspec"><div class="sv">${m.ctx}</div><div class="sl">contexto</div></div>
+      <div class="mspec"><div class="sv">${m.inp}</div><div class="sl">input /1M</div></div>
+      <div class="mspec"><div class="sv">${m.out}</div><div class="sl">output /1M</div></div>
+    </div></div>`).join("");
+  return `<div class="view">
+    <p class="intro">⚖️ <b>Comparador de modelos.</b> Precios por millón de tokens. Regla práctica: <b>Haiku</b> para lo simple y masivo, <b>Sonnet</b> para el día a día, <b>Opus/Fable</b> para lo más difícil.</p>
+    <div class="mcompare">${cards}</div>
+    <p class="upd">Datos verificados contra la documentación de Anthropic · jun-2026. Los precios y modelos pueden cambiar: revisa el sitio oficial.</p>
+  </div>`;
+}
+
+function glossItems(){ const out=[]; MODS.forEach(m=>m.conceptos.forEach((c,i)=>out.push({m,c,k:key(m,i)}))); return out.sort((a,b)=>a.c.termino.localeCompare(b.c.termino,"es")); }
+function glossList(){
+  const q=state.gq.trim().toLowerCase(); let items=glossItems();
+  if(q) items=items.filter(x=>(x.c.termino+" "+x.c.queEs).toLowerCase().includes(q));
+  if(!items.length) return `<div class="empty">Sin resultados… prueba otro término 🔍</div>`;
+  return items.map(x=>`<button class="gitem" data-a="gi" style="--cc:${x.m.colorAcento}">
+    <div class="row"><h4>${esc(x.c.termino)}</h4><span class="gtag">${x.m.icono} ${esc(x.m.titulo)}</span>${learned.has(x.k)?"✅":""}</div>
+    <div class="def">${esc(x.c.queEs)}</div>
+    <div class="more"><div class="block tip"><b>💡 Consejo</b><p>${esc(x.c.consejo)}</p></div></div>
+  </button>`).join("");
+}
+function vGloss(){ return `<div class="view"><input class="search" id="gsearch" type="search" placeholder="🔍 Busca un término (ej: token, prompt, contexto...)" value="${esc(state.gq)}"><div id="glist">${glossList()}</div></div>`; }
+
+function newQuestion(){
+  const pool=[]; MODS.forEach(m=>m.conceptos.forEach((c,i)=>{ if(!quizOK.has(key(m,i))) pool.push({m,c,i}); }));
+  if(!pool.length) return {done:true};
+  const q=pick(pool), tipo=Math.floor(Math.random()*3);
+  const otros=shuffle(q.m.conceptos.filter(c=>c!==q.c)).slice(0,3).map(c=>c.termino);
+  while(otros.length<3){ const c=pick(pick(MODS).conceptos); if(c.termino!==q.c.termino&&!otros.includes(c.termino)) otros.push(c.termino); }
+  const opts=shuffle([q.c.termino,...otros]);
+  return { k:key(q.m,q.i), m:q.m, c:q.c, tipo, opts, correct:opts.indexOf(q.c.termino), answered:false, picked:-1 };
+}
+function vQuiz(){
+  if(!state.quiz) state.quiz=newQuestion(); const q=state.quiz;
+  const head=`<div class="qhead"><span class="score">🎯 Aciertos: <b>${quizOK.size}</b> / ${QUIZTOTAL}</span><button class="reset" data-a="quiz-reset">↺ Reiniciar</button></div><div class="qbar"><i style="width:${Math.round(quizOK.size/QUIZTOTAL*100)}%"></i></div>`;
+  if(q.done) return `<div class="view">${head}<div class="qcard" style="text-align:center"><span style="font-size:50px">🏆</span><h3 style="margin:10px 0 6px">¡Desafío completado!</h3><p style="color:var(--muted);font-size:.88rem">Respondiste todos los conceptos. Dominas a Claude de punta a punta. Puedes reiniciar para repasar.</p></div></div>`;
+  const preg=q.tipo===0?"🎯 Según esta definición, ¿qué concepto es?":q.tipo===1?"💡 ¿A qué concepto pertenece este consejo?":"🔧 ¿De qué concepto habla esto?";
+  const texto=q.tipo===0?q.c.queEs:q.tipo===1?q.c.consejo:q.c.comoUsarlo;
+  const letras=["A","B","C","D"];
+  const opts=q.opts.map((t,i)=>{ let cls="opt"; if(q.answered&&i===q.correct)cls+=" good"; if(q.answered&&i===q.picked&&i!==q.correct)cls+=" bad"; return `<button class="${cls}" data-a="opt" data-i="${i}" ${q.answered?"disabled":""}><span class="lt">${letras[i]}</span>${esc(t)}</button>`; }).join("");
+  let feed=""; if(q.answered) feed=q.picked===q.correct?`<div class="qfeed ok">✅ ¡Correcto! «${esc(q.c.termino)}».</div>`:`<div class="qfeed no">La respuesta correcta era <b>«${esc(q.c.termino)}»</b>. ${esc(q.c.queEs)}</div>`;
+  return `<div class="view">${head}<div class="qcard"><div class="qtag"><span class="gtag" style="--cc:${q.m.colorAcento}">${q.m.icono} ${esc(q.m.titulo)}</span></div><div class="qtag">${preg}</div><div class="qtext">${esc(texto)}</div></div>${opts}${feed}${q.answered?`<button class="nextbtn" data-a="quiz-next">Siguiente →</button>`:""}</div>`;
+}
+
+function barColor(p){ return p>=75?"var(--good)":p>=40?"var(--warn)":"var(--bad)"; }
+function vProgress(){
+  const pct=Math.round(learned.size/TOTAL*100);
+  const ring=`<div class="ringbox"><div class="ring" style="background:conic-gradient(var(--clay) 0%, var(--sand) ${pct}%, var(--line) ${pct}%)"><div><div><b>${pct}%</b><span>aprendido</span></div></div></div><div class="ringinfo"><h3>${pct===100?"👑 ¡Maestría!":pct>=50?"🚀 Vas muy bien":pct>0?"🌱 Buen comienzo":"✶ ¡Bienvenido!"}</h3><p>${learned.size} de ${TOTAL} conceptos · ${quizOK.size} aciertos en el Desafío · 🔥 racha de ${streak.count} día${streak.count===1?"":"s"}.</p></div></div>`;
+  const bars=MODS.map(m=>{ const tot=m.conceptos.length, ok=m.conceptos.filter((_,i)=>learned.has(key(m,i))).length, p=Math.round(ok/tot*100); return `<div class="brow"><div class="lab"><span>${m.icono} ${esc(m.titulo)}</span><span>${ok}/${tot}</span></div><div class="bar"><i style="width:${p}%;background:${barColor(p)}"></i></div></div>`; }).join("");
+  const pq=Math.round(quizOK.size/QUIZTOTAL*100);
+  const quizBar=`<div class="brow"><div class="lab"><span>🧠 Desafío</span><span>${quizOK.size}/${QUIZTOTAL}</span></div><div class="bar"><i style="width:${pq}%;background:${barColor(pq)}"></i></div></div>`;
+  const sb={ learned:learned.size, total:TOTAL, quiz:quizOK.size, quizTotal:QUIZTOTAL, streak:streak.count, modsDone:modsDone() };
+  const md=MEDALS.map(b=>{ const on=medals.has(b.id)||b.cond(sb); return `<div class="medal ${on?"unlock":"lock"}"><span class="be">${b.emoji}</span><b>${esc(b.nombre)}</b><small>${esc(b.desc)}</small></div>`; }).join("");
+  return `<div class="view">${ring}<div class="pcard"><h3>📊 Avance por tema</h3>${bars}${quizBar}</div><div class="pcard"><h3>🏅 Medallas</h3><div class="medals">${md}</div></div></div>`;
+}
+
+/* celebración + hitos */
+function confetti(n){ const box=$("#confetti"); box.innerHTML=""; const cs=["#cc785c","#bd5d3a","#b8956a","#8a4d8f","#b8862f","#4f7a4a","#ffffff"]; for(let i=0;i<n;i++){ const s=document.createElement("i"); s.style.left=Math.random()*100+"%"; s.style.background=pick(cs); s.style.animationDuration=(2.2+Math.random()*2.4)+"s"; s.style.animationDelay=(Math.random()*0.8)+"s"; s.style.transform="rotate("+Math.random()*360+"deg)"; box.appendChild(s); } }
+let celeTimer=null;
+function celebrate(t,x,e,g){ $("#celeTitle").textContent=t; $("#celeText").textContent=x; $("#celeEmoji").textContent=e||"✶"; $("#cele").hidden=false; confetti(g?170:90); fanfare(); clearTimeout(celeTimer); celeTimer=setTimeout(()=>{$("#cele").hidden=true;},15000); }
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),2800); }
+function checkAll(){
+  const nuevos=[]; MODS.forEach(m=>{ if(m.conceptos.every((_,i)=>learned.has(key(m,i)))&&!milestones.has("mod-"+m.id)){ milestones.add("mod-"+m.id); nuevos.push(m); } });
+  const pct=Math.round(learned.size/TOTAL*100), hitos=[];
+  [[25,"m25"],[50,"m50"],[75,"m75"],[100,"m100"]].forEach(([mm,kk])=>{ if(pct>=mm&&!milestones.has("g"+mm)){ milestones.add("g"+mm); hitos.push(kk); } });
+  const sb={ learned:learned.size, total:TOTAL, quiz:quizOK.size, quizTotal:QUIZTOTAL, streak:streak.count, modsDone:modsDone() };
+  MEDALS.forEach(b=>{ if(!medals.has(b.id)&&b.cond(sb)){ medals.add(b.id); toast("🏅 Medalla: "+b.emoji+" "+b.nombre); } });
+  save();
+  if(hitos.includes("m100")) celebrate("¡100% completado!",pick(CEL.m100),"👑",true);
+  else if(nuevos.length) celebrate("¡Módulo completado!",pick(CEL.mod).replace("{cat}",nuevos[0].titulo),nuevos[0].icono,false);
+  else if(hitos.length) celebrate("¡Hito alcanzado!",pick(CEL[hitos[hitos.length-1]]),"✶",false);
+}
+
+/* banner */
+let motiveIdx=-1;
+function nextMotive(){ const el=$("#motiv"); el.classList.add("out"); setTimeout(()=>{ let i; do{i=Math.floor(Math.random()*MOTIVES.length);}while(i===motiveIdx); motiveIdx=i; el.innerHTML=MOTIVES[i]; el.classList.remove("out"); },300); }
+setInterval(nextMotive,11000);
+
+/* ============================================================
+   EVENTOS
+   ============================================================ */
+document.addEventListener("click",e=>{
+  const el=e.target.closest("[data-a]"); if(!el) return; const act=el.dataset.a;
+  if(act==="enter"){ $("#splash").hidden=true; sessionStorage.setItem("cafSplash","1"); fanfare(); }
+  if(act==="nav"){ state.view=el.dataset.v; state.mod=null; state.quiz=null; tick(); render(); window.scrollTo(0,0); }
+  if(act==="nav-models"){ state.view="models"; state.mod=null; tick(); render(); window.scrollTo(0,0); }
+  if(act==="mod"){ state.view="mod"; state.mod=el.dataset.id; state.tab="aprender"; state.fcOrder=[]; state.fcIdx=0; state.fcFlip=false; tick(); render(); window.scrollTo(0,0); }
+  if(act==="back"){ state.view="home"; state.mod=null; tick(); render(); window.scrollTo(0,0); }
+  if(act==="tab"){ state.tab=el.dataset.t; state.fcFlip=false; tick(); render(); }
+  if(act==="learn"||act==="fc-learn"){ const k=el.dataset.k; if(learned.has(k)){learned.delete(k);tick();}else{learned.add(k);ding();} save(); checkAll(); if(act==="fc-learn"&&learned.has(k)){state.fcIdx=(state.fcIdx+1)%9999;state.fcFlip=false;} render(); }
+  if(act==="flip"){ state.fcFlip=!state.fcFlip; tick(); render(); }
+  if(act==="fc-next"){ state.fcIdx++; state.fcFlip=false; tick(); render(); }
+  if(act==="fc-prev"){ state.fcIdx=Math.max(0,state.fcIdx-1); state.fcFlip=false; tick(); render(); }
+  if(act==="fc-shuffle"){ state.fcOrder=[]; state.fcIdx=0; state.fcFlip=false; tick(); render(); }
+  if(act==="copy"){ e.stopPropagation(); const txt=el.dataset.t; (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast("⧉ Prompt copiado")).catch(()=>toast("Copia manual: selecciona el texto")); return; }
+  if(act==="gi"){ el.classList.toggle("open"); tick(); }
+  if(act==="opt"){ const q=state.quiz; if(!q||q.answered)return; q.answered=true; q.picked=Number(el.dataset.i); if(q.picked===q.correct){quizOK.add(q.k);learned.add(q.k);ding();save();checkAll();}else buzz(); render(); }
+  if(act==="quiz-next"){ state.quiz=null; tick(); render(); window.scrollTo(0,0); }
+  if(act==="quiz-reset"){ quizOK.clear(); save(); state.quiz=null; toast("🔄 Reiniciado"); render(); }
+  if(act==="cele-ok"){ $("#cele").hidden=true; clearTimeout(celeTimer); tick(); }
+  if(act==="motive"){ nextMotive(); tick(); }
+  if(act==="dark"){ toggleDark(); }
+  if(act==="sound"){ toggleSound(); }
+  if(act==="install"){ doInstall(); }
+});
+document.addEventListener("input",e=>{ if(e.target.id==="gsearch"){ state.gq=e.target.value; $("#glist").innerHTML=glossList(); } });
+
+/* tema, sonido, instalar, splash, sw */
+function applyDark(){ $("#btnDark").textContent=document.body.classList.contains("dark")?"☀️":"🌙"; }
+function toggleDark(){ document.body.classList.toggle("dark"); localStorage.setItem("cafDark",document.body.classList.contains("dark")?"1":"0"); applyDark(); tick(); }
+if(localStorage.getItem("cafDark")==="0") document.body.classList.remove("dark"); applyDark();
+function applySound(){ $("#btnSound").textContent=soundOn?"🔊":"🔇"; }
+function toggleSound(){ soundOn=!soundOn; localStorage.setItem("cafSound",soundOn?"1":"0"); applySound(); if(soundOn)tick(); } applySound();
+let defPrompt=null; const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent); const standalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); defPrompt=e; if(!standalone)$("#btnInstall").hidden=false; });
+if(!standalone) $("#btnInstall").hidden=false;
+window.addEventListener("appinstalled",()=>{ $("#btnInstall").hidden=true; toast("✅ ¡App instalada!"); });
+function doInstall(){ if(defPrompt){defPrompt.prompt();defPrompt=null;return;} if(isIOS){toast("📲 Toca Compartir ⬆️ y elige «Agregar a inicio»");return;} toast("📲 Menú del navegador (⋮) → «Instalar app»"); }
+if(!sessionStorage.getItem("cafSplash")) $("#splash").hidden=false;
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+/* arranque */
+$("#upd").textContent="Contenido técnico actualizado: junio 2026.";
+motiveIdx=Math.floor(Math.random()*MOTIVES.length); $("#motiv").innerHTML=MOTIVES[motiveIdx];
+render();
+</script>
+
+<!-- ============================================================
+     PWA — copias para separar (ya existen como manifest.json / sw.js):
+==== manifest.json ====
+{ "name":"Claude a Fondo","short_name":"Claude a Fondo","start_url":".","display":"standalone",
+  "background_color":"#1a1714","theme_color":"#1a1714",
+  "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+           {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}] }
+==== sw.js ====  (CACHE = "caf-v1"; HTML network-first; resto cache-first)
+============================================================ -->
+</body>
+</html>

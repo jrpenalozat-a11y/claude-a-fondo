@@ -1,0 +1,16 @@
+{
+  "name": "Claude a Fondo — Domina a Claude",
+  "short_name": "Claude a Fondo",
+  "description": "Academia para entender y dominar a Claude: características, filosofía, prompting, optimización de tokens y uso ético, con consejos en cada tema.",
+  "lang": "es",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a1714",
+  "theme_color": "#1a1714",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
