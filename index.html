@@ -157,6 +157,10 @@ body.dark .prompt{background:rgba(0,0,0,.25)}
 .mspec{text-align:center;padding:8px 4px;border-radius:10px;background:color-mix(in srgb,var(--bg) 55%,transparent);border:1px solid var(--line)}
 .mspec .sv{font-family:'Fraunces';font-weight:700;font-size:.95rem}
 .mspec .sl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.mlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.mlink{display:inline-flex;align-items:center;gap:7px;padding:11px 15px;border-radius:12px;font-size:.84rem;font-weight:700;text-decoration:none;color:#fff;background:var(--grad);box-shadow:var(--shadow2);transition:transform .15s,filter .15s}
+.mlink:hover{transform:translateY(-2px);filter:brightness(1.06)}
+.mlink.alt{background:var(--card);color:var(--clay);border:1px solid var(--line)}
 
 /* glosario */
 .search{width:100%;padding:13px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:inherit;font-size:.95rem;margin-bottom:14px;box-shadow:var(--shadow2);outline:none}
@@ -357,6 +361,227 @@ const DATA = { categorias: [
     comoUsarlo:"Apóyate en lo que hace bien: borradores y reescritura, resumen y comparación de documentos, depurar y explicar código, planear tareas complejas, y trabajar como «agente» con herramientas.",
     ejemplo:"«Lee estos 3 informes, compáralos en una tabla y dime en qué se contradicen, citando la página de cada uno».",
     consejo:"Saca partido del contexto largo: en vez de hacer 5 preguntas sueltas, pega todo el material de una vez y pide el análisis completo. Aprovechas su fuerte y gastas menos en idas y vueltas." }
+]},
+
+/* ===== MÓDULO 2 · PROMPTING QUE FUNCIONA ===== */
+{ id:"prompting", titulo:"Prompting que funciona", icono:"💬", colorAcento:"#c2683f",
+  desc:"El arte de pedirle bien a Claude para obtener mejores respuestas.",
+  conceptos:[
+  { termino:"Dale contexto y un rol",
+    queEs:"Un prompt es la instrucción que le das a Claude. Mientras más claro el rol («actúa como…») y el contexto (para quién es, con qué fin, qué tono), mejor calibra la respuesta. El contexto es la palanca más barata para subir la calidad.",
+    comoUsarlo:"Antes de pedir, dile QUIÉN es y PARA QUÉ: «Actúa como abogado laboral chileno; tu cliente es un trabajador que…». Cuanto mejor el encuadre, menos idas y vueltas.",
+    ejemplo:"Actúa como editor exigente de revista. Reescribe este párrafo para un público general, tono cálido y claro, máximo 80 palabras:\n[tu texto aquí]",
+    consejo:"En la API, el rol suele ir en el «system prompt» (instrucción de sistema): manda sobre toda la conversación. En las apps, ponlo al inicio del primer mensaje y se mantiene en el hilo." },
+  { termino:"Estructura con etiquetas XML",
+    queEs:"Claude entiende muy bien el texto delimitado con etiquetas tipo XML (<contexto>…</contexto>, <tarea>…</tarea>, <ejemplo>…</ejemplo>). Separan las partes del prompt y evitan que confunda tus datos con tus instrucciones.",
+    comoUsarlo:"Envuelve cada parte en su etiqueta. Es clave cuando pegas un documento largo y luego das instrucciones: así no se mezclan el material y la orden.",
+    ejemplo:"<documento>\n[pega aquí el texto largo]\n</documento>\n\n<tarea>\nResume el documento en 5 viñetas y lista las 3 cifras clave.\n</tarea>",
+    consejo:"Las etiquetas no son un lenguaje secreto ni magia: son separadores claros. Usa nombres que digan qué contienen (<factura>, <reglas>) y sé consistente con ellos." },
+  { termino:"Muéstrale ejemplos (few-shot)",
+    queEs:"«Few-shot» significa darle 1 a 3 ejemplos de entrada→salida para que copie el patrón. Es la forma más efectiva de fijar formato y estilo sin tener que explicarlos con palabras.",
+    comoUsarlo:"Antes de tu caso real, muéstrale 2 o 3 ejemplos resueltos tal como los quieres. Claude infiere la regla y la aplica a lo nuevo.",
+    ejemplo:"Clasifica el sentimiento.\nTexto: «Llegó tarde y frío» → Negativo\nTexto: «¡Me encantó, repito!» → Positivo\nTexto: «Estaba ok, nada especial» →",
+    consejo:"Ejemplos buenos > instrucciones largas. Si la salida no sale como quieres, casi siempre se arregla agregando un ejemplo más, no más reglas." },
+  { termino:"Pídele que piense paso a paso",
+    queEs:"Para problemas de varios pasos (lógica, cálculos, decisiones), pedirle que razone antes de responder mejora mucho el acierto. Los modelos modernos (Opus, Fable, Sonnet) además tienen un «pensamiento» que se puede activar.",
+    comoUsarlo:"Agrega «piensa paso a paso antes de responder» o «muestra tu razonamiento». En la API existe el pensamiento adaptativo: Claude decide cuánto pensar según la dificultad.",
+    ejemplo:"Tengo 3 proveedores con estos precios y plazos [datos]. Piensa paso a paso cuál conviene si priorizo costo, luego si priorizo rapidez, y recién entonces da tu recomendación.",
+    consejo:"Para tareas difíciles, elige un modelo que razone bien (Opus 4.8 / Fable 5) y déjalo pensar. Para tareas simples no hace falta: gastarías tokens de más." },
+  { termino:"Dile qué SÍ hacer (en positivo)",
+    queEs:"Las instrucciones en positivo («responde en 3 viñetas», «usa lenguaje simple») funcionan mejor que las negativas («no seas largo», «no uses jerga»). Decir qué quieres es más claro que listar qué evitar.",
+    comoUsarlo:"Reescribe tus prohibiciones como indicaciones positivas y concretas. En vez de «no técnico», di «explícalo como a alguien de 12 años».",
+    ejemplo:"En vez de: «No me des una respuesta larga ni con relleno».\nMejor: «Responde en máximo 4 frases, directo al punto, sin introducción».",
+    consejo:"Si igual necesitas prohibir algo, acompáñalo con la alternativa: «no uses anglicismos; prefiere el término en español»." },
+  { termino:"Define el formato de salida",
+    queEs:"Decir exactamente cómo quieres la respuesta (tabla, JSON, viñetas, número de palabras) evita sorpresas y te ahorra reformatear a mano. Para datos, la API ofrece «salidas estructuradas» que garantizan JSON válido.",
+    comoUsarlo:"Especifica el formato y, si quieres, da una plantilla. Para integraciones con software, pide JSON con campos exactos.",
+    ejemplo:"Devuélvelo como tabla Markdown con columnas: Riesgo | Probabilidad (alta/media/baja) | Mitigación. Una fila por riesgo, sin texto extra.",
+    consejo:"Si vas a procesar la respuesta con código, no le pidas JSON «por favor» y reces: usa las salidas estructuradas de la API (esquema JSON) para que SIEMPRE venga válido." },
+  { termino:"Itera: la conversación es la herramienta",
+    queEs:"Casi nunca aciertas al primer prompt, y está bien. Trata la primera respuesta como un borrador y refínala conversando: «más corto», «más formal», «agrega un ejemplo», «cambia el tono».",
+    comoUsarlo:"No reescribas el prompt desde cero: corrige sobre lo que ya dio. Claude recuerda el hilo (dentro de la ventana de contexto) y ajusta.",
+    ejemplo:"1) «Escríbeme el correo.»\n2) «Más breve y menos formal.»\n3) «Agrega una línea agradeciendo la reunión de ayer.»",
+    consejo:"Guarda tus prompts que funcionan. Un buen prompt es reutilizable: conviértelo en tu plantilla para esa tarea y solo cambia los datos." }
+]},
+
+/* ===== MÓDULO 3 · TOKENS, COSTOS Y VELOCIDAD ===== */
+{ id:"tokens", titulo:"Tokens, costos y velocidad", icono:"🪙", colorAcento:"#4f7a4a",
+  desc:"Cómo se cobra Claude y cómo gastar menos sin perder calidad.",
+  conceptos:[
+  { termino:"¿Qué es un token?",
+    queEs:"Un token es el pedacito en que Claude corta el texto para procesarlo: ni letra ni palabra exacta. En español, ~1 token = 3-4 caracteres, y 1.000 tokens ≈ 750 palabras. Todo —límites de contexto y precios— se mide en tokens.",
+    comoUsarlo:"Piensa en tokens cuando estimes costo o tamaño. Tanto lo que envías (input) como lo que Claude responde (output) cuentan.",
+    ejemplo:"«Inteligencia artificial» ≈ 4-5 tokens. Un documento de 10 páginas ≈ 5.000-7.000 tokens.",
+    consejo:"No estimes con tokenizadores de otras IA (como los de modelos GPT): cuentan distinto. Para precisión, la API tiene un endpoint que cuenta los tokens antes de enviar." },
+  { termino:"Prompt caching: ahorra hasta ~90%",
+    queEs:"Si reutilizas el mismo bloque grande de contexto en varias llamadas (un manual, un system prompt largo, ejemplos), el «prompt caching» lo guarda y lo cobra ~10 veces más barato en las llamadas siguientes.",
+    comoUsarlo:"Marcas el final de la parte estable de tu prompt para cachearla. La primera llamada paga un poco más (escribe la caché); las siguientes leen barato. Dura 5 minutos por defecto (o 1 hora).",
+    ejemplo:"Un asistente de soporte que en cada consulta reenvía el mismo manual de 50 páginas: con caché, el manual se cobra una vez caro y luego casi gratis.",
+    consejo:"Pon lo estable primero (manual, instrucciones) y lo que cambia (la pregunta) al final. Un solo carácter distinto al inicio invalida toda la caché." },
+  { termino:"Procesamiento por lotes (50% menos)",
+    queEs:"Si no necesitas la respuesta al instante, la API de «batches» procesa miles de pedidos de forma asíncrona a mitad de precio. La mayoría termina en menos de 1 hora (máximo 24).",
+    comoUsarlo:"Mandas un lote de tareas y recoges los resultados cuando están listos. Ideal para procesar bases de datos, etiquetar o generar en masa.",
+    ejemplo:"Clasificar 100.000 reseñas o generar 5.000 descripciones de producto de un día para otro, pagando la mitad.",
+    consejo:"Regla simple: ¿el usuario está esperando en pantalla? Llamada normal. ¿Es un trabajo de fondo? Lote, y ahorras 50%." },
+  { termino:"El parámetro de esfuerzo",
+    queEs:"En la API puedes regular cuánto «esfuerzo» pone Claude (low, medium, high, xhigh, max). Más esfuerzo = piensa y trabaja más (mejor en tareas difíciles), pero gasta más tokens y tarda más.",
+    comoUsarlo:"Sube el esfuerzo para código, agentes y razonamiento complejo (high/xhigh); bájalo para tareas simples y sensibles a la latencia (low). El alto suele ser el punto dulce.",
+    ejemplo:"Refactorizar un proyecto entero → esfuerzo alto. Clasificar un texto corto → esfuerzo bajo.",
+    consejo:"No vayas siempre al máximo «por si acaso»: muchas veces «high» rinde igual que «max» gastando menos. Prueba un escalón abajo." },
+  { termino:"Streaming: respuesta token a token",
+    queEs:"El streaming muestra la respuesta a medida que se genera, en vez de esperar a que termine. No cambia el costo, pero mejora la experiencia (ves avance) y evita que se corten las respuestas largas.",
+    comoUsarlo:"Actívalo siempre que la respuesta pueda ser larga o el usuario esté esperando. Es lo que hace que el texto «aparezca escribiéndose».",
+    ejemplo:"Un chat que muestra la respuesta palabra por palabra, en lugar de quedarse 20 segundos en blanco «pensando».",
+    consejo:"Para respuestas grandes (mucho output) el streaming no es un lujo: sin él, las peticiones largas pueden cortarse por tiempo de espera." },
+  { termino:"Mide antes de gastar",
+    queEs:"Antes de lanzar algo a escala, conviene estimar el costo. La API permite contar los tokens exactos de un prompt sin ejecutarlo, y la respuesta de cada llamada te dice cuántos tokens usaste.",
+    comoUsarlo:"Cuenta los tokens de un caso típico, multiplícalos por la tarifa del modelo y por tu volumen. Así sabes si un proyecto es rentable antes de construirlo.",
+    ejemplo:"5.000 tokens de input + 1.000 de output por consulta, en Sonnet 4.6 ($3 / $15 por millón) ≈ $0,03 por consulta.",
+    consejo:"El output cuesta ~5× más que el input. Para bajar la factura, lo que más mueve la aguja es acortar la salida y elegir bien el modelo." }
+]},
+
+/* ===== MÓDULO 4 · LO QUE CLAUDE PUEDE HACER ===== */
+{ id:"capacidades", titulo:"Lo que Claude puede hacer", icono:"🛠️", colorAcento:"#8a4d8f",
+  desc:"Más allá de chatear: ver imágenes, leer PDFs, usar herramientas y conectarse a tus apps.",
+  conceptos:[
+  { termino:"Visión: entiende imágenes",
+    queEs:"Claude es multimodal: además de texto, puede mirar imágenes (fotos, capturas, diagramas, gráficos) y razonar sobre ellas. Describe, extrae datos, explica o revisa a partir de lo que ve.",
+    comoUsarlo:"Adjunta una imagen y pregúntale sobre ella. Sirve para leer un cartel, transcribir una tabla desde una foto, explicar un gráfico o revisar un diseño.",
+    ejemplo:"Sube la foto de una factura y pide: «Extrae los ítems, cantidades y total en una tabla».",
+    consejo:"Para detalle fino (texto pequeño, números) envía la imagen en buena resolución. Aun así, verifica las cifras críticas: la visión es muy buena, no infalible." },
+  { termino:"Lee documentos y PDFs",
+    queEs:"Puedes darle documentos completos —PDFs, textos, planillas— para que los lea y trabaje sobre ellos. Con la API, los archivos se suben una vez y se reutilizan en varias preguntas sin reenviarlos.",
+    comoUsarlo:"Adjunta el PDF y pregunta. Como la ventana de contexto es enorme (hasta 1M de tokens), caben contratos o libros largos completos.",
+    ejemplo:"«Aquí va el contrato de arriendo (PDF). ¿Qué cláusulas son inusuales y cuáles me conviene negociar? Cita la página de cada una.»",
+    consejo:"Pídele que cite la fuente (página o sección). Así verificas rápido y reduces el riesgo de que invente." },
+  { termino:"Uso de herramientas (tool use)",
+    queEs:"Claude puede usar «herramientas» que tú le defines: funciones de tu software (buscar en tu base de datos, consultar el clima, crear una orden). Claude decide cuándo llamarlas y con qué datos; tu sistema las ejecuta y le devuelve el resultado.",
+    comoUsarlo:"Defines la herramienta (nombre, para qué sirve, qué datos recibe). Claude la invoca cuando hace falta, lee el resultado y sigue. Es la base de los asistentes que «hacen», no solo conversan.",
+    ejemplo:"Un asistente de reservas: detecta «quiero mesa para 4 el viernes», llama a tu función reservar(fecha, personas) y confirma.",
+    consejo:"Describe muy bien CUÁNDO usar cada herramienta, no solo qué hace. Y para acciones irreversibles (pagar, borrar), pon una confirmación humana de por medio." },
+  { termino:"Ejecución de código",
+    queEs:"Claude puede escribir y ejecutar código en un entorno seguro (sandbox) que corre en los servidores de Anthropic, con Python y librerías de datos listas. Útil para cálculos, análisis y gráficos sin que tú montes nada.",
+    comoUsarlo:"Le pides un cálculo o análisis y Claude escribe el código, lo corre y te da el resultado (incluso gráficos o archivos). Puedes subir datos para que los procese.",
+    ejemplo:"«Aquí va un CSV de ventas. Calcula la tendencia mensual y dame un gráfico de barras.»",
+    consejo:"Para números importantes, esto es más confiable que pedírselos «de cabeza»: el código calcula de verdad en vez de estimar. Aun así, revisa los supuestos." },
+  { termino:"Búsqueda web",
+    queEs:"Claude puede buscar en internet y traer información actual (noticias, precios, documentación reciente) que no estaba en su entrenamiento, devolviéndola con citas a las fuentes.",
+    comoUsarlo:"Cuando la respuesta depende de algo posterior a su fecha de corte o que cambia seguido, la búsqueda web lo resuelve. Verás los enlaces de donde sacó cada dato.",
+    ejemplo:"«Busca las novedades de la última actualización de [producto] de esta semana y resúmelas, con fuentes.»",
+    consejo:"Pídele que cite y abre los enlaces clave: la búsqueda reduce las alucinaciones, no las elimina. La fuente original manda." },
+  { termino:"Salidas estructuradas (JSON)",
+    queEs:"Para conectar Claude con otro software, puedes exigir que responda en un formato exacto (un esquema JSON con campos definidos). La API garantiza que la salida cumpla el esquema, sin texto suelto que rompa tu programa.",
+    comoUsarlo:"Defines el esquema (qué campos, de qué tipo) y Claude responde solo con ese JSON válido. Ideal para extracción de datos e integraciones.",
+    ejemplo:"Extraer de un correo: { nombre, email, empresa, interesado: true/false } — siempre con esa forma exacta.",
+    consejo:"Si tu código depende del formato, no confíes en «pídeselo amablemente»: usa salidas estructuradas. Es la diferencia entre una demo y algo que no se cae en producción." },
+  { termino:"MCP: conecta tus apps",
+    queEs:"El MCP (Model Context Protocol) es un estándar abierto para conectar Claude con herramientas y fuentes de datos externas (tu Drive, GitHub, una base de datos) de forma uniforme, sin programar cada integración a mano.",
+    comoUsarlo:"Conectas un «servidor MCP» y Claude gana acceso a esas capacidades. Hay servidores para muchos servicios populares; también puedes crear el tuyo.",
+    ejemplo:"Con un servidor MCP de tu repositorio le pides: «Revisa los cambios del último PR y resume los riesgos».",
+    consejo:"MCP es como un «enchufe universal» para la IA: en vez de integraciones a medida una por una, hablas un mismo idioma con todas. Cuida los permisos de lo que conectas." }
+]},
+
+/* ===== MÓDULO 5 · CLAUDE COMO AGENTE ===== */
+{ id:"agente", titulo:"Claude como agente", icono:"🤖", colorAcento:"#b8862f",
+  desc:"Cuando Claude no solo responde: planifica, usa herramientas y trabaja solo en varios pasos.",
+  conceptos:[
+  { termino:"¿Qué es un agente?",
+    queEs:"Un agente es Claude usado como «cerebro» que cumple un objetivo en varios pasos: planifica, usa herramientas (busca, escribe, ejecuta), mira el resultado y sigue, hasta terminar. Pasa de «conversar» a «hacer».",
+    comoUsarlo:"Le das una meta y las herramientas; él arma el camino. Conviene cuando la tarea es multipaso y difícil de detallar de antemano (no para un simple «extrae este dato»).",
+    ejemplo:"«Toma este reporte de bug, encuentra la causa en el código, arréglalo y deja los tests pasando.»",
+    consejo:"Usa agente cuando el valor justifique el costo y los errores se puedan revisar (tests, revisión). Para tareas simples, una sola llamada rinde más y cuesta menos." },
+  { termino:"Claude Code: en la terminal",
+    queEs:"Claude Code es Claude trabajando dentro de tu computador (en la terminal y editores): lee tu proyecto, escribe y edita archivos, corre comandos y construye software contigo. Esta misma app fue hecha así.",
+    comoUsarlo:"Le hablas en lenguaje natural sobre tu código y él hace los cambios, ejecuta pruebas y explica. Tú revisas y apruebas.",
+    ejemplo:"«Agrega a esta app una sección nueva con buscador y modo oscuro, y verifica que funcione.»",
+    consejo:"Trabaja en ramas de git y revisa los cambios (el diff) antes de aceptar. Claude Code es muy capaz, pero tú sigues siendo quien firma el código." },
+  { termino:"Pensamiento adaptativo y esfuerzo",
+    queEs:"Los modelos modernos pueden «pensar» antes de responder. El pensamiento adaptativo deja que Claude decida cuánto razonar según la dificultad; el parámetro de esfuerzo te deja subir o bajar esa profundidad.",
+    comoUsarlo:"Para tareas largas y autónomas, déjalo pensar y dale esfuerzo alto: planifica mejor y se equivoca menos. Para lo simple, menos pensamiento = más rápido y barato.",
+    ejemplo:"Un agente que debe migrar un proyecto entero rinde mejor con pensamiento activado, esfuerzo alto y la meta bien definida desde el primer mensaje.",
+    consejo:"Da el objetivo completo y claro de entrada: los modelos autónomos rinden más con una meta bien especificada al inicio que con instrucciones a goteo." },
+  { termino:"Contexto largo y compactación",
+    queEs:"En tareas muy largas, la conversación puede crecer hasta llenar la ventana de contexto. La «compactación» resume automáticamente lo viejo para seguir trabajando sin perder el hilo ni cortarse.",
+    comoUsarlo:"En agentes y sesiones extensas esto pasa solo: Claude condensa lo anterior cuando se acerca al límite. No tienes que reiniciar la conversación.",
+    ejemplo:"Un agente que lleva 3 horas refactorizando: la compactación mantiene lo esencial y descarta el ruido de pasos ya resueltos.",
+    consejo:"Aun con 1M de tokens, no llenes la ventana «porque sí»: contexto enfocado = mejor foco y menor costo. Dale lo relevante, no todo el historial." },
+  { termino:"Skills: habilidades a la medida",
+    queEs:"Las «Skills» (habilidades) son paquetes de instrucciones y conocimiento que Claude carga solo cuando la tarea lo amerita. Le enseñan a hacer algo específico (un formato, un procedimiento) sin inflar cada prompt.",
+    comoUsarlo:"Defines una habilidad una vez (cómo armar tu reporte, tus reglas de estilo) y Claude la usa cuando corresponde. Las apps de Anthropic ya traen varias listas.",
+    ejemplo:"Una skill «informe mensual» que sabe tu plantilla, tus métricas y tu tono: pides «arma el informe de junio» y aplica todo eso.",
+    consejo:"Piensa las skills como recetas reutilizables del equipo: lo que hoy explicas en cada chat, conviértelo en una habilidad y deja de repetirte." }
+]},
+
+/* ===== MÓDULO 6 · FILOSOFÍA, SEGURIDAD Y ÉTICA ===== */
+{ id:"etica", titulo:"Filosofía, seguridad y ética", icono:"⚖️", colorAcento:"#6b8390",
+  desc:"Por qué Claude se comporta como se comporta, y cómo usarlo con responsabilidad.",
+  conceptos:[
+  { termino:"Útil, honesto e inofensivo",
+    queEs:"Es el principio de diseño de Claude («helpful, honest, harmless»): debe ayudarte de verdad, no inventar con tal de complacer, y evitar causar daño. Cuando esos objetivos chocan, prioriza no dañar.",
+    comoUsarlo:"Esto explica su carácter: directo pero cuidadoso, dispuesto a decir «no sé» o a no hacer algo riesgoso. No es timidez, es su brújula.",
+    ejemplo:"Si le pides algo peligroso o que te perjudica, te lo dirá y propondrá una alternativa segura, en vez de obedecer ciegamente.",
+    consejo:"Aprovecha la honestidad: pídele que señale lo que NO sabe o de qué no está seguro. Un asistente que admite sus límites vale más que uno que siempre suena seguro." },
+  { termino:"IA Constitucional",
+    queEs:"Anthropic entrena a Claude con «IA Constitucional»: un conjunto de principios (una «constitución») que guían su comportamiento, en vez de depender solo de miles de etiquetas humanas caso por caso. La seguridad fue la misión desde que nació la empresa.",
+    comoUsarlo:"No necesitas los detalles para usarlo, pero ayuda entender que sus límites no son caprichos: vienen de principios explícitos sobre cómo debe actuar.",
+    ejemplo:"Frente a una zona gris, Claude razona contra esos principios para decidir qué responde y cómo.",
+    consejo:"Si un rechazo te parece exagerado, reformula dando contexto legítimo (para qué lo necesitas). Muchas veces el problema era que parecía dañino sin contexto." },
+  { termino:"Por qué a veces se niega",
+    queEs:"Claude rechaza pedidos que considera dañinos, ilegales o peligrosos. No es un error ni un bug: es parte del diseño. A veces se pasa de cauto («sobre-rechazo») por falta de contexto.",
+    comoUsarlo:"Si el rechazo no corresponde, explícale el propósito real y legítimo. Si de verdad es algo que no hará, no insistas con trucos: busca otra vía.",
+    ejemplo:"«Necesito esto para un curso de ciberseguridad autorizado, con fines defensivos» suele desbloquear un rechazo por malentendido.",
+    consejo:"No intentes «engañarlo» para saltarte las reglas: además de poco fiable, te aleja del uso responsable. El contexto honesto funciona mejor que el truco." },
+  { termino:"Alucinaciones: verifica siempre",
+    queEs:"Una alucinación es cuando Claude inventa algo falso con total seguridad: una cita, una cifra, una ley o una función que no existe. Pasa porque predice texto probable, no verdad verificada.",
+    comoUsarlo:"Trátalo como un experto brillante pero falible: úsalo para acelerar, y verifica lo crítico (datos, cifras, citas, leyes) antes de actuar.",
+    ejemplo:"Le pides 5 estudios sobre un tema y te da 5 con autores y todo… revisa: alguno podría no existir.",
+    consejo:"Reduce el riesgo dándole tú las fuentes (pega el documento) o activando búsqueda web, y pidiéndole que cite. Regla de oro de la era IA: verifica antes de usar." },
+  { termino:"Privacidad y tus datos",
+    queEs:"Lo que escribes en Claude puede ser sensible. Conviene no compartir secretos (claves, contraseñas, datos personales de terceros) si no es necesario, y conocer la política de privacidad del producto que uses (app, API o empresa).",
+    comoUsarlo:"Minimiza: dale solo los datos que la tarea necesita. Para información muy sensible, revisa qué plan usas y si esos datos podrían usarse para entrenar.",
+    ejemplo:"Antes de pegar un contrato con datos personales, borra o anonimiza lo que no haga falta para la consulta.",
+    consejo:"Nunca pongas contraseñas o claves de API dentro del prompt «para que las use»: pásalas por canales seguros de tu software, no por el chat." },
+  { termino:"No es un oráculo",
+    queEs:"Claude es enormemente útil, pero no es infalible ni neutral ni una autoridad final. Tiene una fecha de corte de conocimiento, puede equivocarse y refleja sesgos de sus datos. La responsabilidad de la decisión sigue siendo tuya.",
+    comoUsarlo:"Úsalo como copiloto experto: para borradores, análisis, opciones y segundas opiniones. En decisiones importantes (legales, médicas, financieras), confírmalo con un profesional.",
+    ejemplo:"«Dame opciones con sus pros y contras» rinde más que «dime qué debo hacer con mi vida».",
+    consejo:"Mientras más te juegas con la respuesta, más debes verificar. La IA acelera el camino; el volante lo manejas tú." }
+]},
+
+/* ===== MÓDULO 7 · SÁCALE EL JUGO ===== */
+{ id:"jugo", titulo:"Sácale el jugo", icono:"🚀", colorAcento:"#bd5d3a",
+  desc:"Flujos prácticos para que Claude te ahorre horas de verdad.",
+  conceptos:[
+  { termino:"Resumir y analizar documentos largos",
+    queEs:"Una de las cosas que Claude hace mejor: leer mucho texto y destilarlo. Gracias al contexto enorme, puedes pegarle informes, contratos o varios documentos a la vez y pedir el análisis completo.",
+    comoUsarlo:"Pega todo el material de una vez (mejor que 5 preguntas sueltas) y pide resumen, comparación o los puntos clave, con citas.",
+    ejemplo:"«Lee estos 3 informes y compáralos en una tabla: en qué coinciden, en qué se contradicen y qué recomienda cada uno, citando la página.»",
+    consejo:"Pídele estructura (tabla, viñetas) y que cite la fuente. Aprovechas su fuerte y de paso puedes verificar de un vistazo." },
+  { termino:"Programar con Claude",
+    queEs:"Claude es muy fuerte en código: escribe funciones, explica código ajeno, encuentra bugs, traduce entre lenguajes y planifica cambios. Con Claude Code, además los aplica en tu proyecto real.",
+    comoUsarlo:"Dale el contexto (el código, el error, qué quieres lograr) y pide pasos concretos. Para bugs, pégale el mensaje de error completo.",
+    ejemplo:"«Este test falla con este error [pega]. Encuentra la causa, propón el arreglo y explícame por qué pasaba.»",
+    consejo:"Pídele que explique mientras codea: aprendes y de paso detectas si va por buen camino. Y prueba siempre el código antes de confiar en él." },
+  { termino:"Escribir y reescribir",
+    queEs:"Para textos —correos, informes, publicaciones, guiones— Claude acelera el borrador y mejora lo que ya tienes: ajusta tono, largo, claridad y estilo a tu gusto.",
+    comoUsarlo:"Dale el objetivo, el público y el tono. Si ya tienes un borrador, pídele que lo pula en vez de partir de cero.",
+    ejemplo:"«Reescribe este correo para que suene cordial pero firme, máximo 6 líneas, y termina con una pregunta clara.»",
+    consejo:"Dale una muestra de tu estilo (un texto tuyo) y pídele que escriba «como yo». Imita el tono mucho mejor con un ejemplo que con adjetivos." },
+  { termino:"Analizar datos",
+    queEs:"Puedes darle planillas, CSV o tablas para que encuentre patrones, calcule y los explique. Con ejecución de código, además corre los números de verdad y genera gráficos.",
+    comoUsarlo:"Sube los datos y haz preguntas en lenguaje natural. Pide que muestre cómo llegó al resultado para poder confiar.",
+    ejemplo:"«Con este CSV de ventas, dime los 3 productos que más cayeron este trimestre y posibles causas, con un gráfico.»",
+    consejo:"Para cálculos que importan, pídele que use ejecución de código en vez de estimar de memoria: el código no alucina números." },
+  { termino:"Estudiar y aprender",
+    queEs:"Claude es un tutor paciente: explica a tu nivel, da ejemplos, te toma pruebas y reformula hasta que entiendas. Funciona para cualquier tema, desde matemáticas hasta un idioma.",
+    comoUsarlo:"Dile tu nivel y cómo aprendes mejor: «explícamelo como a un principiante, con una analogía y luego un ejercicio».",
+    ejemplo:"«Soy nuevo en finanzas. Explícame qué es el interés compuesto con una analogía cotidiana y ponme un problema para resolver.»",
+    consejo:"Pídele que te haga preguntas a ti, no solo respuestas. Aprendes más cuando te evalúa y corrige que cuando solo lees su explicación." },
+  { termino:"Traducir y adaptar el tono",
+    queEs:"Más que traducir palabra por palabra, Claude adapta: ajusta el registro (formal/informal), la cultura local y el propósito del texto, manteniendo el sentido.",
+    comoUsarlo:"Pide la traducción indicando para quién y para qué. Puedes pedir varias versiones (más formal, más cercana) y elegir.",
+    ejemplo:"«Traduce este anuncio al inglés para clientes en EE.UU., tono cercano y persuasivo, no literal.»",
+    consejo:"Para textos importantes, pídele que explique las decisiones de traducción dudosas. Y si dominas algo el idioma, revisa los matices." }
 ]}
 ]};
 
@@ -532,7 +757,11 @@ function vModels(){
   return `<div class="view">
     <p class="intro">⚖️ <b>Comparador de modelos.</b> Precios por millón de tokens. Regla práctica: <b>Haiku</b> para lo simple y masivo, <b>Sonnet</b> para el día a día, <b>Opus/Fable</b> para lo más difícil.</p>
     <div class="mcompare">${cards}</div>
-    <p class="upd">Datos verificados contra la documentación de Anthropic · jun-2026. Los precios y modelos pueden cambiar: revisa el sitio oficial.</p>
+    <div class="mlinks">
+      <a class="mlink" href="https://www.anthropic.com/pricing" target="_blank" rel="noopener">🔖 Precios oficiales (en vivo)</a>
+      <a class="mlink alt" href="https://platform.claude.com/docs/en/about-claude/models/overview" target="_blank" rel="noopener">📋 Modelos y capacidades</a>
+    </div>
+    <p class="upd">Datos verificados contra la documentación de Anthropic · jun-2026. Los precios y modelos cambian con el tiempo: para el valor del token al día, abre los enlaces oficiales de arriba.</p>
   </div>`;
 }
 
